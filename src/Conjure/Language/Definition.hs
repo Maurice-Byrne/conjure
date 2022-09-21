@@ -56,6 +56,7 @@ import Conjure.Language.Expression
 -- aeson
 import Data.Aeson ( (.=), (.:) )
 import qualified Data.Aeson as JSON
+import qualified Data.Aeson.KeyMap as KM
 import qualified Data.HashMap.Strict as M       -- unordered-containers
 import qualified Data.Vector as V               -- vector
 
@@ -89,7 +90,7 @@ instance SimpleJSON Model where
     fromSimpleJSON json =
         case json of
             JSON.Object inners -> do
-                stmts <- forM (M.toList inners) $ \ (name, valueJSON) -> do
+                stmts <- forM (KM.toList inners) $ \ (name, valueJSON) -> do
                     value <- fromSimpleJSON valueJSON
                     return $ Declaration (Letting (Name name) value)
                 return def { mStatements = stmts }
@@ -113,7 +114,7 @@ instance Pretty Model where
         ]
 
 instance VarSymBreakingDescription Model where
-    varSymBreakingDescription m = JSON.Object $ M.fromList
+    varSymBreakingDescription m = JSON.Object $ KM.fromList
         [ ("type", JSON.String "Model")
         , ("symmetricChildren", JSON.Bool True)
         , ("children", JSON.Array $ V.fromList $ map varSymBreakingDescription $ mStatements m)
