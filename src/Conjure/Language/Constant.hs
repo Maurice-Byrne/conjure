@@ -43,6 +43,7 @@ import Test.QuickCheck ( Arbitrary(..), oneof )
 
 -- aeson
 import qualified Data.Aeson as JSON
+import qualified Data.Aeson.KeyMap as KM
 import qualified Data.HashMap.Strict as M       -- unordered-containers
 import qualified Data.Vector as V               -- vector
 
@@ -105,10 +106,10 @@ instance SimpleJSON Constant where
         ys <- mapM fromSimpleJSON (V.toList xs)
         return $ ConstantFromJSON ys
     fromSimpleJSON (JSON.Object m) = do
-        ys <- forM (M.toList m) $ \ (name, value) ->
+        ys <- forM (KM.toList m) $ \ (name, value) ->
             -- the name must be an integer
             -- and this is a function from ints we are reading here
-            case readMay (textToString name) of
+            case readMay (show name) of
                 Nothing -> userErr1 "This is not an int. Boo."
                 Just a -> do
                     b <- fromSimpleJSON value

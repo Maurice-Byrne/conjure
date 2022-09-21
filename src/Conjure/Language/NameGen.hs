@@ -1,5 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 {-# LANGUAGE BangPatterns #-}
+{-# LANGUAGE InstanceSigs #-}
 
 module Conjure.Language.NameGen
     ( NameGen
@@ -39,7 +40,7 @@ newtype NameGenM m a = NameGenM (StateT NameGenState m a)
              , MonadIO
              )
 
-class (Functor m, Applicative m, Monad m) => NameGen m where
+class (Functor m, Applicative m, MonadFail m) => NameGen m where
     nextName :: NameKind -> m Name
     exportNameGenState :: m [(NameKind, Int)]
     importNameGenState :: [(NameKind, Int)] -> m ()
@@ -79,7 +80,7 @@ instance NameGen m => NameGen (Pipes.Proxy a b c d m) where
     exportNameGenState = lift exportNameGenState
     importNameGenState = lift . importNameGenState
 
-instance (Functor m, Monad m) => NameGen (NameGenM m) where
+instance (Functor m, MonadFail m) => NameGen (NameGenM m) where
     nextName k = do
         mi <- gets (M.lookup k . fst)
         out <- case mi of
@@ -98,9 +99,9 @@ instance (Functor m, Monad m) => NameGen (NameGenM m) where
 
 instance NameGen (Either Doc) where
     nextName _ = fail "nextName{Either Doc}"
+    exportNameGenState :: Either Doc [(NameKind, Int)]
     exportNameGenState = fail "exportNameGenState{Either Doc}"
     importNameGenState _ = fail "importNameGenState{Either Doc}"
-
 instance NameGen Identity where
     nextName _ = fail "nextName{Identity}"
     exportNameGenState = fail "exportNameGenState{Identity}"

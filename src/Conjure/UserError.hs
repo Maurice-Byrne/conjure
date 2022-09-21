@@ -88,7 +88,6 @@ instance (MonadFail m) => Monad (UserErrorT m) where
         case a of
             Left e -> return (Left e)
             Right x -> runUserErrorT (k x)
-    fail = lift . fail
 
 instance (MonadIO m, MonadFail m) => MonadIO (UserErrorT m) where
     liftIO comp = UserErrorT $ do

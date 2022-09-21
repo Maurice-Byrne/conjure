@@ -5,6 +5,7 @@
 {-# LANGUAGE DeriveGeneric, DeriveDataTypeable #-}
 {-# LANGUAGE UndecidableInstances #-}
 
+
 module Conjure.Prelude
     ( module X
     , stringToDoc
@@ -74,8 +75,6 @@ import GHC.Num as X ( Num(..) )
 import GHC.Generics as X ( Generic )
 import Data.Functor as X ( Functor(..) )
 import Control.Applicative as X ( Applicative(..), (<$>), (<*), (*>), (<|>), many, some, optional )
-import qualified Control.Monad ( fail )
-
 import Control.Monad                as X ( Monad(return, (>>), (>>=))
                                          , (<=<), (>=>), (=<<), ap, join
                                          , guard, void, when, unless
@@ -157,7 +156,8 @@ import qualified Data.Aeson.Types as JSON
 import Test.QuickCheck ( Gen )
 
 -- megaparsec
-import Text.Megaparsec.Prim ( ParsecT )
+-- megaparsec
+import Text.Megaparsec ( ParsecT, Parsec )
 
 -- pretty
 import Text.PrettyPrint as X
@@ -218,6 +218,7 @@ import Data.Time.Clock ( getCurrentTime )
 import System.TimeIt as X ( timeIt, timeItNamed )
 
 import Debug.Trace as X ( trace, traceM )
+import Data.Void (Void)
 
 tracing :: Show a => String -> a -> a
 tracing s a = trace ("tracing " ++ s ++ ": " ++ show a) a
@@ -377,7 +378,7 @@ na :: MonadFail m => Doc -> m a
 na message = fail ("N/A:" <+> message)
 
 instance MonadFail Identity where
-    fail = Control.Monad.fail . show
+    fail = fail . (Pr.text . show)
 
 instance MonadFail Maybe where
     fail = const Nothing
@@ -403,17 +404,17 @@ instance (MonadFail m, Monoid w) => MonadFail (WriterT w m) where
 instance MonadFail m => MonadFail (ReaderT r m) where
     fail = lift . fail
 
-instance MonadFail Gen where
-    fail = Control.Monad.fail . show
+-- instance MonadFail Gen where
+--     fail = Control.Monad.fail . show
 
-instance MonadFail (ParsecT l m) where
-    fail = Control.Monad.fail . show
+instance MonadFail (Parsec Void T.Text) where
+    fail = fail . (Pr.text . show)
 
 instance MonadFail m => MonadFail (Pipes.Proxy a b c d m) where
     fail = lift . fail
 
 instance MonadFail TH.Q where
-    fail = Control.Monad.fail . show
+    fail = fail .  (Pr.text . show)
 
 
 newtype ExceptT m a = ExceptT { runExceptT :: m (Either Doc a) }
@@ -432,7 +433,7 @@ instance (Monad m) => Monad (ExceptT m) where
         case a of
             Left e -> return (Left e)
             Right x -> runExceptT (k x)
-    fail = ExceptT . return . Left . stringToDoc
+    -- fail = ExceptT . return . Left . stringToDoc
 
 instance MonadIO m => MonadIO (ExceptT m) where
     liftIO comp = ExceptT $ do
