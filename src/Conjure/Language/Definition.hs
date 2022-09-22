@@ -56,6 +56,7 @@ import Conjure.Language.Expression
 -- aeson
 import Data.Aeson ( (.=), (.:) )
 import qualified Data.Aeson as JSON
+import qualified Data.Aeson.Key as K
 import qualified Data.Aeson.KeyMap as KM
 import qualified Data.HashMap.Strict as M       -- unordered-containers
 import qualified Data.Vector as V               -- vector
@@ -84,15 +85,15 @@ instance SimpleJSON Model where
     toSimpleJSON m = do
         inners <- mapM toSimpleJSON (mStatements m)
         let (innersAsMaps, rest) = unzip [ case i of JSON.Object mp -> ([mp], []); _ -> ([], [i]) | i <- inners ]
-                                    |> (\ (xs, ys) -> (M.unions (concat xs), concat ys))
+                                    |> (\ (xs, ys) -> ((mconcat) <$> xs, concat ys))
         unless (null rest) $ bug $ "Expected json objects only, but got:" <+> vcat (map pretty rest)
-        return (JSON.Object innersAsMaps)
+        return (JSON.Object $ mconcat innersAsMaps)
     fromSimpleJSON json =
         case json of
             JSON.Object inners -> do
                 stmts <- forM (KM.toList inners) $ \ (name, valueJSON) -> do
                     value <- fromSimpleJSON valueJSON
-                    return $ Declaration (Letting (Name name) value)
+                    return $ Declaration (Letting (Name $ K.toText name) value)
                 return def { mStatements = stmts }
             _ -> noFromSimpleJSON "Model" json
 
