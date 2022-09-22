@@ -79,7 +79,7 @@ import Control.Monad                as X ( Monad(return, (>>), (>>=))
                                          , (<=<), (>=>), (=<<), ap, join
                                          , guard, void, when, unless
                                          , zipWithM, zipWithM_, foldM, filterM, replicateM
-                                         , MonadPlus(..), mzero, msum )
+                                         , MonadPlus(..), mzero, msum)
 import Control.Monad.Trans.Class    as X ( MonadTrans(lift) )
 import Control.Monad.Identity       as X ( Identity, runIdentity )
 import Control.Monad.IO.Class       as X ( MonadIO, liftIO )
@@ -378,6 +378,9 @@ na :: MonadFail m => Doc -> m a
 na message = fail ("N/A:" <+> message)
 
 instance MonadFail Identity where
+    fail = fail . (Pr.text . show)
+
+instance MonadFail Gen where
     fail = fail . (Pr.text . show)
 
 instance MonadFail Maybe where
