@@ -178,7 +178,10 @@ functionAsRelation dispatch reprOptions = Representation chck downD structuralCo
 
         symmetryOrdering :: TypeOf_SymmetryOrdering m
         symmetryOrdering innerSO downX1 inp domain = do
-            [rel] <- downX1 inp
-            Just [(_, relDomain)] <- downD ("SO", domain)
-            innerSO downX1 rel relDomain
+            relArr <- downX1 inp
+            dom' <- downD ("SO", domain)
+            case (relArr,dom') of
+                ([rel],Just [(_,relDomain)]) -> innerSO downX1 rel relDomain
+                _ -> fail "Pattern match fail{symmetryOrdering}"
+            
 
