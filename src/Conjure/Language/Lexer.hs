@@ -514,7 +514,7 @@ runLexer text = do
     let x = parseMaybe eLex text
     case x of 
         Just y -> return $  mapToLexemePos <$> y
-        Nothing -> fail "Error"
+        Nothing -> failDoc "Error"
 
     
     
@@ -534,7 +534,7 @@ runLexer text = do
 --             if T.null t
 --                 then return []
 --                 else case results of
---                         [] -> fail ("Lexing error:" Pr.<+> Pr.text (T.unpack t))
+--                         [] -> failDoc ("Lexing error:" Pr.<+> Pr.text (T.unpack t))
 --                         ((rest,lexeme):_) -> (lexeme:) <$> go rest
 
 --         -- attach source positions to lexemes

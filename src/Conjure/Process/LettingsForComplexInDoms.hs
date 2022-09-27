@@ -51,7 +51,7 @@ inlineLettingDomainsForDecls m = do
                 Just d -> transformM f d
                 _ -> if name `elem` unnameds
                         then return (DomainReference name Nothing)
-                        else fail $ vcat
+                        else failDoc $ vcat
                                 $ ("No value for:" <+> pretty name)
                                 : "Bindings in context:"
                                 : prettyContext ctxt

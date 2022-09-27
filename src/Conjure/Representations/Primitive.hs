@@ -23,7 +23,7 @@ primitive = Representation
     , rDownC      = const $ return Nothing
     , rUp         = \ ctxt (name, _) ->
         case lookup name ctxt of
-            Nothing -> fail $ vcat
+            Nothing -> failDoc $ vcat
                 $ ("No value for:" <+> pretty name)
                 : "Bindings in context:"
                 : prettyContext ctxt

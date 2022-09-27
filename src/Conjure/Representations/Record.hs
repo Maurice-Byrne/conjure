@@ -65,7 +65,7 @@ record = Representation chck downD structuralCons downC up symmetryOrdering
             let names = map (mkName name . fst) ds
             vals <- forM names $ \ n ->
                 case lookup n ctxt of
-                    Nothing -> fail $ vcat $
+                    Nothing -> failDoc $ vcat $
                         [ "(in Record up)"
                         , "No value for:" <+> pretty n
                         , "When working on:" <+> pretty name

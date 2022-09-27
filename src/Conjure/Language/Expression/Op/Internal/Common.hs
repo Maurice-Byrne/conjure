@@ -79,7 +79,7 @@ intToInt p a = do
     tya <- typeOf a
     case tya of
         TypeInt t -> return (TypeInt t)
-        _         -> fail $ vcat
+        _         -> failDoc $ vcat
             [ "When type checking:" <+> pretty p
             , "Argument expected to be an int, but it is:" <++> pretty tya
             ]
@@ -93,15 +93,15 @@ intToIntToInt p a b = do
         (TypeInt{}, TypeInt{}) ->
             if typeUnify tya tyb
                 then return $ mostDefined [tya, tyb]
-                else fail $ vcat
+                else failDoc $ vcat
                         [ "When type checking:" <+> pretty p
                         , "Types do not unify:" <++> pretty tya 
                         ]
-        (_, TypeInt{})         -> fail $ vcat
+        (_, TypeInt{})         -> failDoc $ vcat
             [ "When type checking:" <+> pretty p
             ,  "First argument expected to be an int, but it is:" <++> pretty tya
             ]
-        _                      -> fail $ vcat
+        _                      -> failDoc $ vcat
             [ "When type checking:" <+> pretty p
             , "Second argument expected to be an int, but it is:" <++> pretty tyb
             ]
@@ -113,11 +113,11 @@ boolToBoolToBool p a b = do
     tyb <- typeOf b
     case (tya, tyb) of
         (TypeBool, TypeBool) -> return TypeBool
-        (_, TypeBool)        -> fail $ vcat
+        (_, TypeBool)        -> failDoc $ vcat
             [ "When type checking:" <+> pretty p
             ,  "First argument expected to be a bool, but it is:" <++> pretty tya
             ]
-        _                    -> fail $ vcat
+        _                    -> failDoc $ vcat
             [ "When type checking:" <+> pretty p
             , "Second argument expected to be a bool, but it is:" <++> pretty tyb
             ]
@@ -138,7 +138,7 @@ sameToSameToBool p a b acceptableTypes checkType = do
                     else checkType tyAB || any (typeUnify tyAB) acceptableTypes
     case (tyA `typeUnify` tyB, allowed) of
         (True, True) -> return TypeBool
-        (False, _) -> fail $ vcat
+        (False, _) -> failDoc $ vcat
             [ "When type checking:" <+> pretty p
             , "Cannot unify the types of the following."
             , "lhs        :" <+> pretty a
@@ -146,7 +146,7 @@ sameToSameToBool p a b acceptableTypes checkType = do
             , "rhs        :" <+> pretty b
             , "type of rhs:" <+> pretty tyB
             ]
-        (_, False) -> fail $ vcat
+        (_, False) -> failDoc $ vcat
             [ "When type checking:" <+> pretty p
             , "Arguments have unsupported types."
             , "lhs        :" <+> pretty a
@@ -170,7 +170,7 @@ sameToSameToSame p a b acceptableTypes checkType = do
                     else checkType tyAB || any (typeUnify tyAB) acceptableTypes
     case (tyA `typeUnify` tyB, allowed) of
         (True, True) -> return tyAB
-        (False, _) -> fail $ vcat
+        (False, _) -> failDoc $ vcat
             [ "When type checking:" <+> pretty p
             , "Cannot unify the types of the following."
             , "lhs        :" <+> pretty a
@@ -178,7 +178,7 @@ sameToSameToSame p a b acceptableTypes checkType = do
             , "rhs        :" <+> pretty b
             , "type of rhs:" <+> pretty tyB
             ]
-        (_, False) -> fail $ vcat
+        (_, False) -> failDoc $ vcat
             [ "When type checking:" <+> pretty p
             , "Arguments have unsupported types."
             , "lhs        :" <+> pretty a
@@ -298,4 +298,4 @@ functionals =
     ]
 
 raiseTypeError :: MonadFail m => Pretty a => a -> m b
-raiseTypeError p = fail ("Type error in" <+> pretty p)
+raiseTypeError p = failDoc ("Type error in" <+> pretty p)

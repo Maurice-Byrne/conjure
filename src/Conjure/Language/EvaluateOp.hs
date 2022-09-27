@@ -111,7 +111,7 @@ instance EvaluateOp OpFlatten where
     evaluateOp (OpFlatten (Just n) m) = do
         let flat lvl c | lvl < 0 = return [c]
             flat lvl (viewConstantMatrix -> Just (_, xs)) = concatMapM (flat (lvl-1)) xs
-            flat _ _ = fail $ "Cannot flatten" <+> pretty n <+> "levels."
+            flat _ _ = failDoc $ "Cannot flatten" <+> pretty n <+> "levels."
         flattened <- flat n m
         return (ConstantAbstract $ AbsLitMatrix
                     (DomainInt TagInt [RangeBounded 1 (fromInt (genericLength flattened))])
@@ -204,7 +204,7 @@ instance EvaluateOp OpIndexing where
         ty   <- typeOf m
         tyTo <- case ty of TypeMatrix _ tyTo -> return tyTo
                            TypeList tyTo     -> return tyTo
-                           _ -> fail "evaluateOp{OpIndexing}"
+                           _ -> failDoc "evaluateOp{OpIndexing}"
         return $ mkUndef tyTo $ "Has undefined children (index):" <+> pretty p
     evaluateOp (OpIndexing m@(viewConstantMatrix -> Just (DomainInt _ index, vals)) (ConstantInt _ x)) = do
             ty   <- typeOf m
@@ -226,7 +226,7 @@ instance EvaluateOp OpIndexing where
         return (at vals (fromInteger (x-1)))
     evaluateOp rec@(OpIndexing (viewConstantRecord -> Just vals) (ConstantField name _)) =
         case lookup name vals of
-            Nothing -> fail $ vcat
+            Nothing -> failDoc $ vcat
                     [ "Record doesn't have a member with this name:" <+> pretty name
                     , "Record:" <+> pretty rec
                     ]
@@ -813,7 +813,7 @@ intsOut2D :: MonadFail m => Doc -> Constant -> m [[Integer]]
 intsOut2D doc (viewConstantMatrix -> Just (_, cs)) = mapM (intsOut doc) cs
 intsOut2D doc (viewConstantSet -> Just cs) = mapM (intsOut doc) cs
 intsOut2D doc (viewConstantMSet -> Just cs) = mapM (intsOut doc) cs
-intsOut2D doc _ = fail ("intsOut2D" <+> doc)
+intsOut2D doc _ = failDoc ("intsOut2D" <+> doc)
 
 tildeLt :: Constant -> Constant -> Bool
 tildeLt = tilLt

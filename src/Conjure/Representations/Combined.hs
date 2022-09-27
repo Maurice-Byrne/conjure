@@ -131,7 +131,7 @@ up ctxt (name, highDomain) = do
     case toDescend' of
         Nothing ->
             case lookup name ctxt of
-                Nothing -> fail $ vcat
+                Nothing -> failDoc $ vcat
                     $ ("No value for:" <+> pretty name)
                     : "Bindings in context:"
                     : prettyContext ctxt

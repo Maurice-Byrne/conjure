@@ -95,7 +95,7 @@ toTaggedInt = transformBi f
 
 
 check :: MonadFail m => Expression -> m ()
-check (Reference nm Nothing) = fail ("Undefined:" <+> pretty nm)
+check (Reference nm Nothing) = failDoc ("Undefined:" <+> pretty nm)
 check _ = return ()
 
 
@@ -180,7 +180,7 @@ resolveX (Reference nm Nothing) = do
 resolveX p@(Reference nm (Just refto)) = do             -- this is for re-resolving
     mval <- gets (lookup nm)
     case mval of
-        Nothing -> return p                             -- hence, do not fail if not in the context
+        Nothing -> return p                             -- hence, do not failDoc if not in the context
         Just DeclNoRepr{}                               -- if the newly found guy doesn't have a repr
             | DeclHasRepr{} <- refto                    -- but the old one did, do not update
             -> return p

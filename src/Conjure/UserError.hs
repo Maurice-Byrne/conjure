@@ -4,7 +4,7 @@ module Conjure.UserError
     , failToUserError, failToBug
     ) where
 
-import Conjure.Prelude hiding ( fail )
+import Conjure.Prelude hiding ( failDoc )
 import qualified Conjure.Prelude as Prelude ( MonadFail(..) )
 import Conjure.Bug
 import Conjure.Language.Pretty
@@ -12,7 +12,6 @@ import Conjure.Language.Pretty
 -- base
 import System.Exit ( exitWith, ExitCode(..) )
 import System.IO as X ( stderr, hPutStrLn )
-import Control.Monad ( fail )
 
 -- pipes
 import qualified Pipes

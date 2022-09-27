@@ -152,7 +152,7 @@ instantiateE (Reference name refto) = do
                     -- reuse that
                     instantiateE x
                 _ -> 
-                    fail $ vcat
+                    failDoc $ vcat
                     $ ("No value for:" <+> pretty name)
                     : "Bindings in context:"
                     : prettyContext ctxt
@@ -168,7 +168,7 @@ instantiateE (Domain (DomainReference name Nothing)) = do
     ctxt <- gets id
     case name `lookup` ctxt of
         Just (Domain d) -> instantiateE (Domain d)
-        _ -> fail $ vcat
+        _ -> failDoc $ vcat
             $ ("No value for:" <+> pretty name)
             : "Bindings in context:"
             : prettyContext ctxt
@@ -180,8 +180,8 @@ instantiateE (WithLocals b (AuxiliaryVars locals)) = do
             constant <- instantiateE x
             case constant of
                 ConstantBool True -> return ()
-                _                 -> fail $ "local:" <+> pretty constant
-        _ -> fail $ "local:" <+> pretty local
+                _                 -> failDoc $ "local:" <+> pretty constant
+        _ -> failDoc $ "local:" <+> pretty local
     instantiateE b
 
 instantiateE (WithLocals b (DefinednessConstraints locals)) = do
@@ -189,10 +189,10 @@ instantiateE (WithLocals b (DefinednessConstraints locals)) = do
             constant <- instantiateE x
             case constant of
                 ConstantBool True -> return ()
-                _                 -> fail $ "local:" <+> pretty constant
+                _                 -> failDoc $ "local:" <+> pretty constant
     instantiateE b
 
-instantiateE x = fail $ "instantiateE:" <+> pretty (show x)
+instantiateE x = failDoc $ "instantiateE:" <+> pretty (show x)
 
 
 instantiateOp ::
@@ -250,8 +250,8 @@ instantiateD (DomainEnum nm Nothing _) = do
     st <- gets id
     case lookup nm st of
         Just (Domain dom) -> instantiateD (defRepr dom)
-        Just _  -> fail $ ("DomainEnum not found in state, Just:" <+> pretty nm) <++> vcat (map pretty st)
-        Nothing -> fail $ ("DomainEnum not found in state, Nothing:" <+> pretty nm) <++> vcat (map pretty st)
+        Just _  -> failDoc $ ("DomainEnum not found in state, Just:" <+> pretty nm) <++> vcat (map pretty st)
+        Nothing -> failDoc $ ("DomainEnum not found in state, Nothing:" <+> pretty nm) <++> vcat (map pretty st)
 instantiateD (DomainEnum nm rs0 _) = do
     let fmap4 = fmap . fmap . fmap . fmap
     let e2c' x = either bug id (e2c x)
@@ -260,8 +260,8 @@ instantiateD (DomainEnum nm rs0 _) = do
     st <- gets id
     mp <- forM (universeBi rs :: [Name]) $ \ n -> case lookup n st of
             Just (Constant (ConstantInt _ i)) -> return (n, i)
-            Nothing -> fail $ "No value for member of enum domain:" <+> pretty n
-            Just c  -> fail $ vcat [ "Incompatible value for member of enum domain:" <+> pretty nm
+            Nothing -> failDoc $ "No value for member of enum domain:" <+> pretty n
+            Just c  -> failDoc $ vcat [ "Incompatible value for member of enum domain:" <+> pretty nm
                                    , "    Looking up for member:" <+> pretty n
                                    , "    Expected an integer, but got:" <+> pretty c
                                    ]
@@ -285,7 +285,7 @@ instantiateD (DomainReference name Nothing) = do
     ctxt <- gets id
     case name `lookup` ctxt of
         Just (Domain d) -> instantiateD (defRepr d)
-        _ -> fail $ vcat
+        _ -> failDoc $ vcat
             $ ("No value for:" <+> pretty name)
             : "Bindings in context:"
             : prettyContext ctxt

@@ -61,6 +61,7 @@ readModelFromStdin = do
 
 readParamJSON ::
     MonadIO m =>
+    MonadFail m =>
     MonadUserError m =>
     FilePath -> m Model
 readParamJSON fp = do
@@ -171,6 +172,7 @@ onlyPreamble
 
 
 writeModel ::
+    MonadFail m =>
     MonadIO m =>
     MonadUserError m =>
     Int ->
@@ -215,6 +217,7 @@ writeModel lnWidth MiniZinc (Just fp) spec = do
 
 
 writeModels ::
+    MonadFail m =>
     MonadIO m =>
     MonadUserError m =>
     Int ->

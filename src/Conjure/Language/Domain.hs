@@ -132,7 +132,7 @@ typeOfDomain d@(DomainIntE x)          = do
         TypeList     (TypeInt TagInt) -> return ()
         TypeMatrix _ (TypeInt TagInt) -> return ()
         TypeSet      (TypeInt TagInt) -> return ()
-        _ -> fail $ vcat [ "Expected an integer, but got:" <++> pretty ty
+        _ -> failDoc $ vcat [ "Expected an integer, but got:" <++> pretty ty
                          , "In domain:" <+> pretty d
                          ]
     return (TypeInt TagInt)
@@ -141,7 +141,7 @@ typeOfDomain d@(DomainInt t rs)        = do
         ty <- typeOf x
         case ty of
             TypeInt{} -> return ()
-            _ -> fail $ vcat [ "Expected an integer, but got:" <++> pretty ty
+            _ -> failDoc $ vcat [ "Expected an integer, but got:" <++> pretty ty
                              , "For:" <+> pretty x
                              , "In domain:" <+> pretty d
                              ]
@@ -164,7 +164,7 @@ typeOfDomain p@(DomainOp _ ds) = do
     ts <- mapM typeOfDomain ds
     if typesUnify ts
         then return (mostDefined ts)
-        else fail ("Type error in" <+> pretty p)
+        else failDoc ("Type error in" <+> pretty p)
 typeOfDomain (DomainReference _ (Just d)) = typeOfDomain d
 typeOfDomain (DomainReference nm Nothing) = bug $ "typeOfDomain: DomainReference" <+> pretty nm
 typeOfDomain (DomainMetaVar nm) = bug $ "typeOfDomain: DomainMetaVar &" <> pretty nm
@@ -279,7 +279,7 @@ applyReprTree (DomainPartition _ attr a  ) (Tree (Just r) [aRepr]) = DomainParti
 applyReprTree dom@DomainOp{}        (Tree Nothing []) = return (defRepr dom)
 applyReprTree dom@DomainReference{} (Tree Nothing []) = return (defRepr dom)
 applyReprTree dom@DomainMetaVar{}   (Tree Nothing []) = return (defRepr dom)
-applyReprTree dom _ = fail $ "applyReprTree:" <++> pretty dom
+applyReprTree dom _ = failDoc $ "applyReprTree:" <++> pretty dom
 
 isPrimitiveDomain :: Domain r x -> Bool
 isPrimitiveDomain DomainBool{} = True
@@ -448,7 +448,7 @@ getMaxFrom_SizeAttr :: MonadFail m => SizeAttr a -> m a
 getMaxFrom_SizeAttr (SizeAttr_Size n) = return n
 getMaxFrom_SizeAttr (SizeAttr_MaxSize n) = return n
 getMaxFrom_SizeAttr (SizeAttr_MinMaxSize _ n) = return n
-getMaxFrom_SizeAttr _ = fail "getMaxFrom_SizeAttr"
+getMaxFrom_SizeAttr _ = failDoc "getMaxFrom_SizeAttr"
 
 
 data MSetAttr a = MSetAttr (SizeAttr a) (OccurAttr a)
@@ -489,7 +489,7 @@ instance Pretty a => Pretty (OccurAttr a) where
 getMaxFrom_OccurAttr :: MonadFail m => OccurAttr a -> m a
 getMaxFrom_OccurAttr (OccurAttr_MaxOccur n) = return n
 getMaxFrom_OccurAttr (OccurAttr_MinMaxOccur _ n) = return n
-getMaxFrom_OccurAttr _ = fail "getMaxFrom_OccurAttr"
+getMaxFrom_OccurAttr _ = failDoc "getMaxFrom_OccurAttr"
 
 
 data FunctionAttr x
@@ -635,7 +635,7 @@ readBinRel AttrName_Euclidean     = return BinRelAttr_Euclidean
 readBinRel AttrName_serial        = return BinRelAttr_Serial
 readBinRel AttrName_equivalence   = return BinRelAttr_Equivalence
 readBinRel AttrName_partialOrder  = return BinRelAttr_PartialOrder
-readBinRel a = fail $ "Not a binary relation attribute:" <+> pretty a
+readBinRel a = failDoc $ "Not a binary relation attribute:" <+> pretty a
 
 binRelToAttrName :: BinaryRelationAttr -> AttrName
 binRelToAttrName BinRelAttr_Reflexive       = AttrName_reflexive    
@@ -1019,7 +1019,7 @@ innerDomainOf (DomainMSet _ _ t) = return t
 innerDomainOf (DomainFunction _ _ a b) = return (DomainTuple [a,b])
 innerDomainOf (DomainRelation _ _ ts) = return (DomainTuple ts)
 innerDomainOf (DomainPartition _ _ t) = return (DomainSet () def t)
-innerDomainOf t = fail ("innerDomainOf:" <+> pretty (show t))
+innerDomainOf t = failDoc ("innerDomainOf:" <+> pretty (show t))
 
 singletonDomainInt :: (Eq x, CanBeAnAlias x) => Domain r x -> Maybe x
 singletonDomainInt (DomainInt _ [RangeSingle a]) = Just a

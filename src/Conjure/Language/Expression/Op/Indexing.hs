@@ -29,7 +29,7 @@ instance (TypeOf x, Pretty x, ExpressionLike x, ReferenceContainer x) => TypeOf 
         case tyM of
             TypeMatrix tyIndex inn
                 | typesUnify [tyIndex, tyI] -> return inn
-                | otherwise -> fail $ "Indexing with inappropriate type:" <++> vcat
+                | otherwise -> failDoc $ "Indexing with inappropriate type:" <++> vcat
                     [ "The expression:"  <+> pretty p
                     , "Indexing:"        <+> pretty m
                     , "Expected type of index:" <+> pretty tyIndex
@@ -37,7 +37,7 @@ instance (TypeOf x, Pretty x, ExpressionLike x, ReferenceContainer x) => TypeOf 
                     ]
             TypeList inn
                 | typesUnify [TypeInt TagInt, tyI] -> return inn
-                | otherwise -> fail $ "Indexing with inappropriate type:" <++> vcat
+                | otherwise -> failDoc $ "Indexing with inappropriate type:" <++> vcat
                     [ "The expression:"  <+> pretty p
                     , "Indexing:"        <+> pretty m
                     , "Expected type of index:" <+> pretty (TypeInt TagInt)
@@ -49,18 +49,18 @@ instance (TypeOf x, Pretty x, ExpressionLike x, ReferenceContainer x) => TypeOf 
                     TypeInt t -> do 
                         case t of
                             TagInt -> return ()
-                            _ -> fail $ "Tuples cannot be indexed by enums/unnameds:" <++> pretty p
+                            _ -> failDoc $ "Tuples cannot be indexed by enums/unnameds:" <++> pretty p
                         case intOut "OpIndexing" i of
-                            Nothing -> fail $ "Tuples can only be indexed by constants:" <++> pretty p
+                            Nothing -> failDoc $ "Tuples can only be indexed by constants:" <++> pretty p
                             Just iInt | iInt <= 0 || iInt > genericLength inns ->
-                                            fail $ "Out of bounds tuple indexing:" <++> pretty p
+                                            failDoc $ "Out of bounds tuple indexing:" <++> pretty p
                                     | otherwise -> return (at inns (fromInteger (iInt-1)))
                     _ -> raiseTypeError p
                  
             TypeRecord inns  -> do
                 nm <- nameOut i
                 case lookup nm inns of
-                    Nothing -> fail $ "Record indexing with non-member field:" <++> vcat
+                    Nothing -> failDoc $ "Record indexing with non-member field:" <++> vcat
                         [ "The expression:" <+> pretty p
                         , "Indexing:"       <+> pretty m
                         , "With type:"      <+> pretty tyM
@@ -69,13 +69,13 @@ instance (TypeOf x, Pretty x, ExpressionLike x, ReferenceContainer x) => TypeOf 
             TypeVariant inns -> do
                 nm <- nameOut i
                 case lookup nm inns of
-                    Nothing -> fail $ "Variant indexing with non-member field:" <++> vcat
+                    Nothing -> failDoc $ "Variant indexing with non-member field:" <++> vcat
                         [ "The expression:" <+> pretty p
                         , "Indexing:"       <+> pretty m
                         , "With type:"      <+> pretty tyM
                         ]
                     Just ty -> return ty
-            _ -> fail $ "Indexing something other than a matrix or a tuple:" <++> vcat
+            _ -> failDoc $ "Indexing something other than a matrix or a tuple:" <++> vcat
                     [ "The expression:" <+> pretty p
                     , "Indexing:"       <+> pretty m
                     , "With type:"      <+> pretty tyM

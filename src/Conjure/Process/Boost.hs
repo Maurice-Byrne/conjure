@@ -190,7 +190,7 @@ addAttrsToModel (n, _) depth attrs m
     addAttrsToDomain level (DomainFunction r as from inner) = addAttrsToDomain (level - 1) inner >=> (pure . DomainFunction r as from)
     addAttrsToDomain level (DomainSequence r as inner) = addAttrsToDomain (level - 1) inner >=> (pure . DomainSequence r as)
     addAttrsToDomain level (DomainPartition r as inner)     = addAttrsToDomain (level - 1) inner >=> (pure . DomainPartition r as)
-    addAttrsToDomain _ _ = const (fail "[addAttrsToDomain] not a supported nested domain")
+    addAttrsToDomain _ _ = const (failDoc "[addAttrsToDomain] not a supported nested domain")
     -- Special treatment for functions
     mkAttr (attr, Just [essence| image(&f, &_) |])     = (attr, Just [essence| max(range(&f)) |])
     mkAttr (attr, Just [essence| image(&f, &_) - 1 |]) = (attr, Just [essence| max(range(&f)) - 1 |])
@@ -216,8 +216,8 @@ refersTo _ _               = False
 nameFromAbstractPattern :: (MonadFail m) => AbstractPattern -> m Name
 nameFromAbstractPattern a = case namesFromAbstractPattern a of
                                  [n] -> pure n
-                                 []  -> fail "[nameFromAbstractPattern] no names in abstract pattern"
-                                 _   -> fail "[nameFromAbstractPattern] more than one name in abstract pattern"
+                                 []  -> failDoc "[nameFromAbstractPattern] no names in abstract pattern"
+                                 _   -> failDoc "[nameFromAbstractPattern] more than one name in abstract pattern"
 
 -- | Get the list of names from an abstract pattern.
 namesFromAbstractPattern :: AbstractPattern -> [Name]
@@ -281,7 +281,7 @@ matching :: Expression
          -> Maybe (a, (Expression, Expression))
 matching e ops = case mapMaybe (\(f1, f2) -> (,) f2 <$> match f1 e) ops of
                       [x] -> pure x
-                      _   -> fail $ "no matching operator for expression:" <+> pretty e
+                      _   -> failDoc $ "no matching operator for expression:" <+> pretty e
 
 -- | (In)equality operator lens pairs.
 ineqOps :: [(BinExprLens Maybe, BinExprLens Identity)]

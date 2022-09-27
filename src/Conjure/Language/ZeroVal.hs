@@ -26,7 +26,7 @@ zeroVal (DomainMatrix index inner) = do
     z  <- zeroVal inner
     is <- case index of
             DomainInt _ rs -> rangesInts rs
-            _ -> fail $ "Matrix indexed by a domain that isn't int:" <+> pretty index
+            _ -> failDoc $ "Matrix indexed by a domain that isn't int:" <+> pretty index
     return $ ConstantAbstract $ AbsLitMatrix index $ replicate (length is) z
 zeroVal d@(DomainSet _ (SetAttr sizeAttr) inner) = do
     z       <- zeroVal inner
@@ -65,7 +65,7 @@ zeroVal d = bug $ "No 'zero' value for domain:" <+> pretty d
 
 
 zeroValR :: MonadFail m => Range a -> m a
-zeroValR RangeOpen = fail "No 'zero' value for an open range."
+zeroValR RangeOpen = failDoc "No 'zero' value for an open range."
 zeroValR (RangeSingle x) = return x
 zeroValR (RangeLowerBounded x) = return x
 zeroValR (RangeUpperBounded x) = return x
@@ -82,4 +82,4 @@ getMin d (SizeAttr_MinMaxSize x _) = returnInt d x
 
 returnInt :: (MonadFail m, Pretty r, Pretty x) => Domain r x -> Constant -> m Integer
 returnInt _ (ConstantInt _ x) = return x
-returnInt d _ = fail $ "Attribute expected to be an int in:" <+> pretty d
+returnInt d _ = failDoc $ "Attribute expected to be an int in:" <+> pretty d

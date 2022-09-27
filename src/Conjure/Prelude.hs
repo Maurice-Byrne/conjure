@@ -4,6 +4,7 @@
 {-# LANGUAGE Rank2Types #-}
 {-# LANGUAGE DeriveGeneric, DeriveDataTypeable #-}
 {-# LANGUAGE UndecidableInstances #-}
+{-# LANGUAGE InstanceSigs #-}
 
 
 module Conjure.Prelude
@@ -31,7 +32,7 @@ module Conjure.Prelude
     , allNats
     , jsonOptions
     , Proxy(..)
-    , MonadFail(..), failCheaply, na
+    , MonadFail(..), failDoc,na
     , allContexts, ascendants
     , dropExtension, dropDirs
     , MonadLog(..), LogLevel(..), runLoggerPipeIO, ignoreLogs
@@ -90,6 +91,8 @@ import Control.Monad.Trans.Identity as X ( IdentityT(..) )
 import Control.Monad.Trans.Maybe    as X ( MaybeT(..), runMaybeT )
 import Control.Monad.Writer.Strict  as X ( MonadWriter(listen, tell), WriterT(runWriterT), execWriterT, runWriter )
 import Control.Monad.Reader         as X ( MonadReader(ask), ReaderT(..), runReaderT, asks )
+
+import Control.Monad.Fail 
 import Control.Arrow                as X ( first, second, (***), (&&&) )
 import Control.Category             as X ( (<<<), (>>>) )
 
@@ -328,7 +331,7 @@ padShowInt n i = let s = show i in replicate (n - length s) '0' ++ s
 decodeFromFile :: (Serialize a, MonadFail IO) => FilePath -> IO a
 decodeFromFile path = do
     con <- ByteString.readFile path
-    either (fail . stringToDoc) return (decode con)
+    either (fail) return (decode con)
 
 class Monad m => RandomM m where
     get_stdgen :: m StdGen
@@ -371,53 +374,55 @@ jsonOptions = JSON.defaultOptions
     }
 
 
-class (Functor m, Applicative m, Monad m) => MonadFail m where
-    fail :: Doc -> m a
+-- class (Functor m, Applicative m, Monad m) => MonadFail m where
+--     failDoc :: Doc -> m a
 
 na :: MonadFail m => Doc -> m a
-na message = fail ("N/A:" <+> message)
+na message = failDoc ("N/A:" <+> message)
 
-instance MonadFail Identity where
-    fail = fail . (Pr.text . show)
-
-instance MonadFail Gen where
-    fail = fail . (Pr.text . show)
-
-instance MonadFail Maybe where
-    fail = const Nothing
-
-instance (a ~ Doc) => MonadFail (Either a) where
-    fail = Left
-
-instance MonadFail m => MonadFail (IdentityT m) where
-    fail = lift . fail
-
-instance (Functor m, Monad m) => MonadFail (MaybeT m) where
-    fail = const $ MaybeT $ return Nothing
-
-instance (Functor m, Monad m) => MonadFail (ExceptT m) where
-    fail = ExceptT . return . Left
-
-instance (Functor m, Monad m, MonadFail m) => MonadFail (StateT st m) where
-    fail = lift . fail
-
-instance (MonadFail m, Monoid w) => MonadFail (WriterT w m) where
-    fail = lift . fail
-
-instance MonadFail m => MonadFail (ReaderT r m) where
-    fail = lift . fail
+failDoc :: MonadFail m => Doc -> m a
+failDoc = fail . show
+-- instance MonadFail Identity where
+--     fail = failDoc . (Pr.text . show)
 
 -- instance MonadFail Gen where
---     fail = Control.Monad.fail . show
+--     fail = failDoc . (Pr.text . show)
 
-instance MonadFail (Parsec Void T.Text) where
-    fail = fail . (Pr.text . show)
+-- instance MonadFail Maybe where
+--     fail = const Nothing
 
-instance MonadFail m => MonadFail (Pipes.Proxy a b c d m) where
-    fail = lift . fail
+instance (a ~ Doc) => MonadFail (Either a) where
+    -- fail :: (a ~ Doc) => Doc -> Either a a1
+    fail = fail  
 
-instance MonadFail TH.Q where
-    fail = fail .  (Pr.text . show)
+-- instance MonadFail m => MonadFail (IdentityT m) where
+--     fail = lift . fail
+
+-- instance (Functor m, Monad m) => MonadFail (MaybeT m) where
+--     fail = const $ MaybeT $ return Nothing
+
+instance (Functor m, MonadFail m) => MonadFail (ExceptT m) where
+    fail  =fail
+
+instance MonadFail Identity where
+    fail = fail
+-- instance (Functor m, Monad m, MonadFail m) => MonadFail (StateT st m) where
+--     fail = lift . fail
+
+-- instance (MonadFail m, Monoid w) => MonadFail (WriterT w m) where
+--     fail = lift . fail
+
+-- instance MonadFail m => MonadFail (ReaderT r m) where
+--     fail = lift . fail
+
+instance MonadFail Gen where
+    fail = fail
+
+-- instance MonadFail m => MonadFail (Pipes.Proxy a b c d m) where
+--     fail = lift . fail
+
+-- instance MonadFail TH.Q where
+--     fail = failDoc .  (Pr.text . show)
 
 
 newtype ExceptT m a = ExceptT { runExceptT :: m (Either Doc a) }
@@ -459,8 +464,8 @@ instance MonadState s m => MonadState s (ExceptT m) where
 --   Running it in a monad like IO will be a little bit more expensive though.
 --   Why not run it in Either and raise the error in the outer monad instead?
 --   Notice: this function cannot be eta-reduced.
-failCheaply :: MonadFail m2 => (forall m . MonadFail m => m a) -> m2 a
-failCheaply m = either fail return m
+-- failCheaply :: MonadFail m2 => (forall m . MonadFail m => m a) -> m2 a
+-- failCheaply m = either failDoc return m
 
 
 allContexts :: Data b => Zipper a b -> [Zipper a b]

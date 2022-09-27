@@ -115,14 +115,14 @@ relationAsSet dispatch reprOptions useLevels = Representation chck downD structu
                 Just (viewConstantSet -> Just tuples) -> do
                     vals <- mapM viewConstantTuple tuples
                     return (name, ConstantAbstract (AbsLitRelation vals))
-                Nothing -> fail $ vcat $
+                Nothing -> failDoc $ vcat $
                     [ "(in RelationAsSet up)"
                     , "No value for:" <+> pretty (outName domain name)
                     , "When working on:" <+> pretty name
                     , "With domain:" <+> pretty domain
                     ] ++
                     ("Bindings in context:" : prettyContext ctxt)
-                Just constant -> fail $ vcat $
+                Just constant -> failDoc $ vcat $
                     [ "Incompatible value for:" <+> pretty (outName domain name)
                     , "When working on:" <+> pretty name
                     , "With domain:" <+> pretty domain

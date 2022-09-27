@@ -63,7 +63,7 @@ functionNDPartial = Representation chck downD structuralCons downC up symmetryOr
                 innerDomainTo) | all domainCanIndexMatrix innerDomainFrs = do
             let
                 kRange = case innerDomainFr of
-                        DomainTuple ts  -> map fromInt [1 .. genericLength ts]
+                        DomainTuple ts  -> map fromInt [1 .. genericLength ts] :: [Constant]
                         DomainRecord rs -> map (fromName . fst) rs
                         _ -> bug $ vcat [ "FunctionNDPartial.structuralCons"
                                         , "innerDomainFr:" <+> pretty innerDomainFr
@@ -202,7 +202,7 @@ functionNDPartial = Representation chck downD structuralCons downC up symmetryOr
                     return ( ConstantAbstract $ AbsLitMatrix i matrixFlags
                            , ConstantAbstract $ AbsLitMatrix i matrixVals
                            )
-                unrollC is prevIndices = fail $ vcat [ "FunctionNDPartial.up.unrollC"
+                unrollC is prevIndices = failDoc $ vcat [ "FunctionNDPartial.up.unrollC"
                                                      , "    is         :" <+> vcat (map pretty is)
                                                      , "    prevIndices:" <+> pretty (show prevIndices)
                                                      ]
@@ -239,7 +239,7 @@ functionNDPartial = Representation chck downD structuralCons downC up symmetryOr
                         index (ConstantAbstract (AbsLitMatrix indexDomain vals)) (i:is) = do
                             froms <- domainValues indexDomain
                             case lookup i (zip froms vals) of
-                                Nothing -> fail "Value not found. FunctionNDPartial.up.index"
+                                Nothing -> failDoc "Value not found. FunctionNDPartial.up.index"
                                 Just v  -> index v is
                         index m is = bug ("FunctionNDPartial.up.index" <+> pretty m <+> pretty (show is))
 
@@ -250,7 +250,7 @@ functionNDPartial = Representation chck downD structuralCons downC up symmetryOr
                         case viewConstantBool flag of
                             Just False -> return Nothing
                             Just True  -> return (Just (mk these, value))
-                            _ -> fail $ vcat
+                            _ -> failDoc $ vcat
                                 [ "Expecting a boolean literal, but got:" <++> pretty flag
                                 , "                           , and    :" <+> pretty value
                                 , "When working on:" <+> pretty name
@@ -260,14 +260,14 @@ functionNDPartial = Representation chck downD structuralCons downC up symmetryOr
                            , ConstantAbstract $ AbsLitFunction $ catMaybes vals
                            )
 
-                (Nothing, _) -> fail $ vcat $
+                (Nothing, _) -> failDoc $ vcat $
                     [ "(in FunctionNDPartial up 1)"
                     , "No value for:" <+> pretty (nameFlags domain name)
                     , "When working on:" <+> pretty name
                     , "With domain:" <+> pretty domain
                     ] ++
                     ("Bindings in context:" : prettyContext ctxt)
-                (_, Nothing) -> fail $ vcat $
+                (_, Nothing) -> failDoc $ vcat $
                     [ "(in FunctionNDPartial up 2)"
                     , "No value for:" <+> pretty (nameValues domain name)
                     , "When working on:" <+> pretty name
@@ -284,7 +284,7 @@ functionNDPartial = Representation chck downD structuralCons downC up symmetryOr
             
             -- setting up the quantification
             let kRange = case innerDomainFr of
-                    DomainTuple ts  -> map fromInt [1 .. genericLength ts]
+                    DomainTuple ts  -> map fromInt [1 .. genericLength ts] ::[Constant]
                     DomainRecord rs -> map (fromName . fst) rs
                     _ -> bug $ vcat [ "FunctionND.rule_Comprehension"
                                     , "indexDomain:" <+> pretty innerDomainFr

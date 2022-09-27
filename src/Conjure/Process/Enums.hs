@@ -291,7 +291,7 @@ addEnumsAndUnnamedsBack unnameds ctxt = helper
 -- first Name is the value, the second Name is the name of the enum domain
 nameToX :: MonadFail m => M.HashMap Name (Name, Integer) -> Expression -> m Expression
 nameToX nameToIntMapping (Reference nm _) = case M.lookup nm nameToIntMapping of
-    Nothing -> fail (pretty nm <+> "is used in a domain, but it isn't a member of the enum domain.")
+    Nothing -> failDoc (pretty nm <+> "is used in a domain, but it isn't a member of the enum domain.")
     Just (Name ename, i)  -> return (fromIntWithTag i (TagEnum ename))
     Just (ename, i) -> bug $ "nameToX, nm:" <+> vcat [pretty (show ename), pretty i]
 nameToX _ x = return x

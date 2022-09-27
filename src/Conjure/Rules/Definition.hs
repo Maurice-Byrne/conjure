@@ -159,10 +159,10 @@ data Rule = Rule
         :: forall n m a .
             ( MonadFail n, MonadUserError n, MonadLog n
             , NameGen n, EnumerateDomain n, MonadReader (Zipper a Expression) n
-                -- a fail in {n} means that the rule isn't applicable
+                -- a failDoc in {n} means that the rule isn't applicable
             , MonadFail m, MonadUserError m, MonadLog m
             , NameGen m, EnumerateDomain m
-                -- a fail in {m} means a bug
+                -- a failDoc in {m} means a bug
             , ?typeCheckerMode :: TypeCheckerMode
             )
         => Zipper a Expression            -- to query context
