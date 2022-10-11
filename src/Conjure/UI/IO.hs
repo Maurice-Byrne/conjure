@@ -16,7 +16,7 @@ import Conjure.UI
 import Conjure.Language
 import qualified Conjure.Language.Parser as Parser
 import qualified Conjure.Language.ParserC as ParserC
-import Conjure.Language.Parser ( Parser )
+import Conjure.Language.Parser 
 
 -- aeson
 import qualified Data.Aeson ( eitherDecodeStrict )
@@ -32,6 +32,7 @@ import qualified Data.Text.Encoding as T ( encodeUtf8 )
 -- bytestring
 import qualified Data.ByteString as BS ( readFile, writeFile )
 import qualified Data.ByteString.Char8 as BS ( putStrLn )
+import Conjure.Language.AST.Syntax (ProgramTree)
 
 
 readModelFromFile ::
@@ -121,7 +122,7 @@ readModelInfoFromFile fp = do
 readModel ::
     MonadFail m =>
     MonadUserError m =>
-    Parser Model ->
+    Parser.Pipeline ProgramTree Model ->
     Maybe (Text -> Text) ->
     (FilePath, Text) ->
     m Model
