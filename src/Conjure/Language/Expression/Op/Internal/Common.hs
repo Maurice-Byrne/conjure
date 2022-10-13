@@ -6,7 +6,9 @@ module Conjure.Language.Expression.Op.Internal.Common
     , BinaryOperator(..)
 
     , prettyPrecBinOp
-    , Fixity(..), operators, functionals,quantifiers
+    , Fixity(..), operators, functionals
+    , overloadedFunctionals
+    , quantifiers
     , EssenceOperatorParsingDescr(..)
 
     , raiseTypeError
@@ -241,6 +243,11 @@ operators =
     , ( UnaryPrefix L_ExclamationMark , 2000 )
     ]
 
+overloadedFunctionals :: [Lexeme]
+overloadedFunctionals = [
+    L_Sum
+    ]
+
 functionals :: [Lexeme]
 functionals =
     [ L_toInt
@@ -284,11 +291,11 @@ functionals =
     , L_transform
     , L_true
 
-    , LIdentifier "and"
-    , LIdentifier "or"
+    , L_fAnd
+    , L_fOr
     , L_Sum
-    , LIdentifier "product"
-    , LIdentifier "xor"
+    , L_Product
+    , L_fXor
 
     , L_active
 
