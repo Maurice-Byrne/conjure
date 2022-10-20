@@ -33,12 +33,15 @@ type NameKind = Text
 
 newtype NameGenM m a = NameGenM (StateT NameGenState m a)
     deriving ( Functor, Applicative, Monad
-             , MonadFail, MonadUserError
+             , MonadUserError
              , MonadLog
              , MonadTrans
              , MonadState NameGenState
              , MonadIO
              )
+instance (MonadFail m) => MonadFail (NameGenM m) where
+    fail = lift . fail
+
 
 class (Functor m, Applicative m, MonadFail m) => NameGen m where
     nextName :: NameKind -> m Name

@@ -223,6 +223,7 @@ import System.TimeIt as X ( timeIt, timeItNamed )
 import Debug.Trace as X ( trace, traceM )
 import Data.Void (Void)
 
+
 tracing :: Show a => String -> a -> a
 tracing s a = trace ("tracing " ++ s ++ ": " ++ show a) a
 
@@ -381,7 +382,7 @@ na :: MonadFail m => Doc -> m a
 na message = failDoc ("N/A:" <+> message)
 
 failDoc :: MonadFail m => Doc -> m a
-failDoc = fail . show
+failDoc s = traceM ("FailDoc called:") >> fail $ show s
 -- instance MonadFail Identity where
 --     fail = failDoc . (Pr.text . show)
 
@@ -390,6 +391,7 @@ failDoc = fail . show
 
 -- instance MonadFail Maybe where
 --     fail = const Nothing
+
 
 instance (a ~ Doc) => MonadFail (Either a) where
     -- fail :: (a ~ Doc) => Doc -> Either a a1
@@ -401,12 +403,17 @@ instance (a ~ Doc) => MonadFail (Either a) where
 -- instance (Functor m, Monad m) => MonadFail (MaybeT m) where
 --     fail = const $ MaybeT $ return Nothing
 
+
+-- instance (MonadTrans t,MonadFail m, Monad (t m)) => MonadFail (t m) where
+--     fail = lift . fail
+
 instance (Functor m, MonadFail m) => MonadFail (ExceptT m) where
-    fail  =fail
+    fail :: (Functor m, MonadFail m) => String -> ExceptT m a
+    fail =  ExceptT . return . Left . stringToDoc
 
 instance MonadFail Identity where
-    fail = fail
--- instance (Functor m, Monad m, MonadFail m) => MonadFail (StateT st m) where
+    fail = Control.Monad.Fail.fail
+-- instance (Functor m, MonadFail m) => MonadFail (StateT st m) where
 --     fail = lift . fail
 
 -- instance (MonadFail m, Monoid w) => MonadFail (WriterT w m) where
@@ -416,7 +423,7 @@ instance MonadFail Identity where
 --     fail = lift . fail
 
 instance MonadFail Gen where
-    fail = fail
+    fail = Control.Monad.Fail.fail
 
 -- instance MonadFail m => MonadFail (Pipes.Proxy a b c d m) where
 --     fail = lift . fail
