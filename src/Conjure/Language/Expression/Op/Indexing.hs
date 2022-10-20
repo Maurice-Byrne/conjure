@@ -44,18 +44,15 @@ instance (TypeOf x, Pretty x, ExpressionLike x, ReferenceContainer x) => TypeOf 
                     , "Actual type of index  :" <+> pretty tyI
                     ]
             TypeTuple inns   -> do
-                x <- typeOf i
-                case x of --TODO: Not sure on this refactor
-                    TypeInt t -> do 
-                        case t of
-                            TagInt -> return ()
-                            _ -> failDoc $ "Tuples cannot be indexed by enums/unnameds:" <++> pretty p
-                        case intOut "OpIndexing" i of
-                            Nothing -> failDoc $ "Tuples can only be indexed by constants:" <++> pretty p
-                            Just iInt | iInt <= 0 || iInt > genericLength inns ->
-                                            failDoc $ "Out of bounds tuple indexing:" <++> pretty p
-                                    | otherwise -> return (at inns (fromInteger (iInt-1)))
-                    _ -> raiseTypeError p
+                TypeInt t <- typeOf i
+                case t of
+                    TagInt -> return ()
+                    _ -> failDoc $ "Tuples cannot be indexed by enums/unnameds:" <++> pretty p
+                case intOut "OpIndexing" i of
+                    Nothing -> failDoc $ "Tuples can only be indexed by constants:" <++> pretty p
+                    Just iInt | iInt <= 0 || iInt > genericLength inns ->
+                                    failDoc $ "Out of bounds tuple indexing:" <++> pretty p
+                              | otherwise -> return (at inns (fromInteger (iInt-1)))
                  
             TypeRecord inns  -> do
                 nm <- nameOut i
