@@ -1012,7 +1012,7 @@ parseExpr = (P.parseExpression,V.strict . V.validateExpression)
 
 runLexerAndParser :: Pipeline n a -> String -> T.Text -> Either Doc a
 runLexerAndParser p file inp = case runPipeline p inp of
-  Left pe -> Left $ "Parser error:" <+> text  (show pe)
+  Left pe -> Left $ "Parser error in file:" <+> text file <+> text  ("Error is:\n" ++ show pe)
   Right a -> Right a
 --     ls <- runLexer inp
 --     case runParser p file ls of
